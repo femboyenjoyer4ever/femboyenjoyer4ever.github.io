@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <script defer data-domain="lndr.me" src="https://plausible.io/js/script.file-downloads.hash.outbound-links.pageview-props.revenue.tagged-events.js"></script>
+<script>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
+
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>leander schlichting</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "media",
+            theme: {
+                extend: {
+                    colors: {
+                        dark: "#121212"
+                    }
+                }
+            }
+        };
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet"/>
+    <style>
+        @font-face {
+            font-family: "nFont";
+            src: url("fonts/nFont.ttf") format("truetype");
+        }
+        
+        body {
+            font-family: "nFont", sans-serif; /* Verwende die Schriftart */
+            margin: 0;
+            padding: 0;
+            background-color: black;
+            color: white;
+        }
+
+        canvas#background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        .logo, #status-container {
+            opacity: 0;
+            transform: translateY(25px);
+            transition: transform 0.75s cubic-bezier(0.45, 0, 0.65, 1), opacity 1s ease-in-out;
+        }
+        .logo.active, #status-container.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        #info-container {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #aaa;
+        }
+        #description {
+            font-weight: bold;
+        }
+        #social-icons {
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        #social-icons i {
+            font-size: 1.75rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        #social-icons i:hover {
+            transform: scale(1.2);
+        }
+        #spotify-footer {
+            position: fixed;
+            bottom: 25px;
+            left: 15px;
+            right: 15px;
+            max-width: 384px;
+            margin: 0 auto;
+            background-color: rgba(0, 0, 0, 0.85);
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+            border-radius: 30px;
+            color: white;
+            font-family: 'nFont';
+            z-index: 10;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: transform 0.75s cubic-bezier(0.45, 0, 0.65, 1), opacity 0.85s ease-in-out;
+        }
+        #spotify-footer.active {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        #spotify-footer.hidden {
+            transform: translateY(20px);
+            opacity: 0;
+        }
+        #spotify-cover {
+            width: 64px;
+            height: 64px;
+            margin-right: 15px;
+            border-radius: 50%;
+            overflow: hidden;
+            animation: rotate 7.5s linear infinite;
+        }
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        #spotify-song-info {
+            flex: 1;
+        }
+        #progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+            margin-top: 8px;
+        }
+        #progress-bar {
+            height: 100%;
+            background: #1DB950;
+            position: absolute;
+            left: 0;
+            width: 0%;
+            transition: width 0.75s ease-in-out;
+        }
+        #progress-time {
+            font-size: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+        }
+        @media (prefers-color-scheme: light) {
+            body { background: white; color: black; }
+            .logo { filter: invert(1); }
+            #social-icons i { filter: invert(1); }
+            #spotify-footer {
+                background-color: rgba(255, 255, 255, 0.85);
+                color: black;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+            }
+            #progress-bar-container { background: rgba(0, 0, 0, 0.20); }
+            #progress-bar { background: #1DB950; }
+            #background { filter: invert(1); }
+        }
+        #description { filter: invert(1); }
+        .online { color: #3BA55C; }
+        .idle { color: #FAA81A; }
+        .dnd { color: #ED4245; }
+        .offline { color: #747F8D; }
+        @media (prefers-color-scheme: dark) {
+            #description { filter: invert(0); }
+            .online { color: #3BA55C; }
+            .idle { color: #FAA81A; }
+            .dnd { color: #ED4245; }
+            .offline { color: #747F8D; }
+        }
+    </style>
+</head>
+<body class="m-0 flex flex-col justify-center items-center h-screen font-[nFont] text-black dark:bg-[#121212] dark:text-white relative">
+    <canvas id="background"></canvas>
+    <img src="https://i.ibb.co/wMKT4jh/leander.png" class="logo mb-3 w-64 object-contain"/>
+    <div id="status-container" class="logo">
+        <div id="description" class="online">Loading user info...</div>
+    </div>
+    <div id="social-icons" class="logo">
+        <a href="mailto:mail@leanderschlichting.de" target="_blank">
+            <i class="fa-solid fa-envelope"></i>
+        </a>
+        <a href="https://discord.com/users/1159863525561356379" target="_blank">
+            <i class="fa-brands fa-discord"></i>
+        </a>
+        <a href="https://github.com/lndrdev" target="_blank">
+            <i class="fa-brands fa-github"></i>
+        </a>
+    </div>
+    <div id="spotify-footer" class="hidden">
+        <div id="spotify-cover">
+            <img src="https://via.placeholder.com/640" id="spotify-cover-image" alt="cover" />
+        </div>
+        <div id="spotify-song-info">
+            <div id="spotify-song-title">title</div>
+            <div id="spotify-artist-name">artist</div>
+            <div id="progress-bar-container">
+                <div id="progress-bar"></div>
+            </div>
+            <div id="progress-time">
+                <span id="current-time">0:00</span>
+                <span id="total-time">0:00</span>
+            </div>
+        </div>
+    </div>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        const LANYARD_WS = "wss://api.lanyard.rest/socket";
+        const DISCORD_ID = "1159863525561356379";
+        let currentSongData = null;
+        let songProgressTimer = null;
+        const statusColors = {
+            online: "#3BA55C",
+            idle: "#FAA81A",
+            dnd: "#ED4245",
+            offline: "#747F8D"
+        };
+        function initializeLanyard(callback) {
+            const ws = new WebSocket(LANYARD_WS);
+            ws.onopen = () => {
+                ws.send(
+                    JSON.stringify({
+                        op: 2,
+                        d: { subscribe_to_id: DISCORD_ID }
+                    })
+                );
+            };
+            ws.onmessage = ({ data }) => {
+                const received = JSON.parse(data);
+                if (received.t === "INIT_STATE" || received.t === "PRESENCE_UPDATE") {
+                    callback(received.d);
+                }
+            };
+            setInterval(() => {
+                ws.send(
+                    JSON.stringify({
+                        op: 3
+                    })
+                );
+            }, 5000);
+            setInterval(refreshStatus, 15000);
+        }
+        function refreshStatus() {
+            ws.send(JSON.stringify({
+                op: 2,
+                d: { subscribe_to_id: DISCORD_ID }
+            }));
+        }
+        function updateSpotifyInfo(spotify) {
+            const spotifyFooter = document.getElementById("spotify-footer");
+            if (spotify) {
+                spotifyFooter.classList.remove("hidden");
+                spotifyFooter.classList.add("active");
+                document.getElementById("spotify-song-title").innerText = spotify.song;
+                const formattedArtist = spotify.artist.replace(/;/g, ', ');
+                document.getElementById("spotify-artist-name").innerText = formattedArtist;
+                document.getElementById("spotify-cover-image").src = spotify.album_art_url;
+                const totalTime = spotify.timestamps.end - spotify.timestamps.start;
+                document.getElementById("total-time").innerText = formatTime(totalTime / 1000);
+                if (songProgressTimer) clearInterval(songProgressTimer);
+                songProgressTimer = setInterval(() => {
+                    const elapsed = new Date().getTime() - spotify.timestamps.start;
+                    if (elapsed >= totalTime) {
+                        clearInterval(songProgressTimer);
+                        updateSpotifyInfo(null);
+                        return;
+                    }
+                    document.getElementById("current-time").innerText = formatTime(elapsed / 1000);
+                    document.getElementById("progress-bar").style.width = `${(elapsed / totalTime) * 100}%`;
+                }, 1000);
+            } else {
+                spotifyFooter.classList.remove("active");
+                spotifyFooter.classList.add("hidden");
+            }
+        }
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            seconds = Math.floor(seconds % 60);
+            return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+        }
+        initializeLanyard((data) => {
+            const { discord_user, discord_status, spotify } = data;
+            const descriptionElement = document.getElementById("description");
+            descriptionElement.innerText = `<${discord_status}>`;
+            descriptionElement.className = discord_status;
+            updateSpotifyInfo(spotify);
+            document.querySelector('.logo').classList.add('active');
+            document.querySelector('#status-container').classList.add('active');
+            document.querySelector('#social-icons').classList.add('active');
+        });
+        const scene = new THREE.Scene(),
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000),
+            renderer = new THREE.WebGLRenderer({
+                canvas: document.getElementById("background"),
+                alpha: true
+            });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        const geometry = new THREE.BufferGeometry();
+        const snowflakeCount = 1000;
+        const positions = new Float32Array(3 * snowflakeCount);
+        for (let i = 0; i < 3 * snowflakeCount; i += 3) {
+            positions[i] = 50 * (Math.random() - 0.5);
+            positions[i + 1] = 50 * (Math.random() - 0.5);
+            positions[i + 2] = 50 * (Math.random() - 0.5);
+        }
+        geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+        const textureLoader = new THREE.TextureLoader();
+        const snowflakeTexture = textureLoader.load(
+            "https://i.postimg.cc/fM4TkwR6/circle.png"
+        );
+        const material = new THREE.PointsMaterial({
+            color: 0xffffff,
+            size: 0.2,
+            transparent: true,
+            opacity: 0.8,
+            map: snowflakeTexture,
+            alphaTest: 0.5,
+            blending: THREE.AdditiveBlending
+        });
+        const snowflakes = new THREE.Points(geometry, material);
+        function animate() {
+            requestAnimationFrame(animate);
+            snowflakes.rotation.y += 0.0025;
+            renderer.render(scene, camera);
+        }
+        scene.add(snowflakes);
+        camera.position.z = 20;
+        animate();
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'8ebd39853f6ecab9',t:'MTczMzE2MjUxMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"rayId":"8ebd39853f6ecab9","serverTiming":{"name":{"cfExtPri":true,"cfL4":true,"cfSpeedBrain":true,"cfCacheStatus":true}},"version":"2024.10.5","token":"550ae5e120b94b1db3f27e7e316aa691"}' crossorigin="anonymous"></script>
+</body>
+</html>
